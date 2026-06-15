@@ -443,3 +443,133 @@ body {
     opacity: 1;
   }
 }
+
+.action-buttons {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.danger-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(245, 101, 101, 0.3);
+}
+
+.danger-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+}
+
+.restore-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.restore-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+}
+
+.recycle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.recycle-header h3 {
+  font-size: 1.4rem;
+  color: #2d3748;
+}
+
+.recycle-count {
+  color: #718096;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.recycle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.recycle-item {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 5px solid #a0aec0;
+  transition: all 0.2s ease;
+}
+
+.recycle-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recycle-item-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.recycle-date {
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.recycle-deleted {
+  color: #a0aec0;
+}
+
+.recycle-question {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.recycle-answer {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.recycle-answer p {
+  color: #4a5568;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.recycle-no-answer {
+  color: #a0aec0;
+  font-style: italic;
+  margin-bottom: 15px;
+}
+
+.recycle-actions {
+  display: flex;
+  gap: 10px;
+}
+

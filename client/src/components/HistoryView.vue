@@ -65,6 +65,11 @@
           <p class="a-text">{{ selectedDay.answer }}</p>
         </div>
         <div v-else class="empty-note">这一天没有回答</div>
+        <div v-if="isPast(selectedDay.date)" class="action-buttons">
+          <button class="danger-btn" @click="handleDelete">
+            🗑️ 删除回答
+          </button>
+        </div>
       </div>
       <div v-else class="empty-note">这一天还没有分配问题</div>
     </div>
@@ -81,7 +86,7 @@ const props = defineProps({
   loading: Boolean
 })
 
-defineEmits(['prev-month', 'next-month'])
+const emit = defineEmits(['prev-month', 'next-month', 'delete-answer'])
 
 const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 const selectedDay = ref(null)
@@ -141,6 +146,13 @@ function formatFullDate(dateStr) {
   const d = new Date(dateStr)
   const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${weekdays[d.getDay()]}`
+}
+
+function handleDelete() {
+  if (selectedDay.value && confirm(`确定要删除 ${selectedDay.value.date} 的回答吗？删除后将移至回收站。`)) {
+    emit('delete-answer', selectedDay.value.date)
+    selectedDay.value = null
+  }
 }
 
 watch(() => props.history, () => {

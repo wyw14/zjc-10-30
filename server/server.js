@@ -12,7 +12,11 @@ app.use(express.json());
 
 function readData() {
   const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-  return JSON.parse(raw);
+  const data = JSON.parse(raw);
+  if (!data.recycleBin) {
+    data.recycleBin = {};
+  }
+  return data;
 }
 
 function writeData(data) {
@@ -118,7 +122,7 @@ app.get('/api/today', (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
@@ -151,7 +155,7 @@ app.post('/api/answer', (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
@@ -216,7 +220,7 @@ app.get('/api/history', (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
@@ -229,13 +233,98 @@ app.get('/api/question-bank', (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+app.delete('/api/answer/:date', (req, res) => {
+  try {
+    const { date } = req.params;
+    const data = readData();
+    if (!data.answers[date]) {
+      return res.status(404).json({ success: false, message: '该日期的回答不存在' });
+    }
+    const answer = data.answers[date];
+    data.recycleBin[date] = {
+      ...answer,
+      originalDate: date,
+      deletedAt: new Date().toISOString()
+    };
+    delete data.answers[date];
+    writeData(data);
+    res.json({ success: true, message: '已移至回收站' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+app.get('/api/recycle-bin', (req, res) => {
+  try {
+    const data = readData();
+    const list = Object.keys(data.recycleBin)
+      .map(date => ({
+        date,
+        ...data.recycleBin[date]
+      }))
+      .sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
+    res.json({
+      success: true,
+      data: list
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+app.post('/api/recycle-bin/restore/:date', (req, res) => {
+  try {
+    const { date } = req.params;
+    const data = readData();
+    if (!data.recycleBin[date]) {
+      return res.status(404).json({ success: false, message: '回收站中不存在该记录' });
+    }
+    if (data.answers[date]) {
+      return res.status(400).json({ success: false, message: '该日期已有回答，无法恢复' });
+    }
+    const item = data.recycleBin[date];
+    const restored = {
+      questionId: item.questionId,
+      question: item.question,
+      answer: item.answer,
+      answered: item.answered,
+      answeredAt: item.answeredAt
+    };
+    data.answers[date] = restored;
+    delete data.recycleBin[date];
+    writeData(data);
+    res.json({ success: true, message: '恢复成功' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
+app.delete('/api/recycle-bin/:date', (req, res) => {
+  try {
+    const { date } = req.params;
+    const data = readData();
+    if (!data.recycleBin[date]) {
+      return res.status(404).json({ success: false, message: '回收站中不存在该记录' });
+    }
+    delete data.recycleBin[date];
+    writeData(data);
+    res.json({ success: true, message: '已彻底删除' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`每日问答后端服务已启�? http://localhost:${PORT}`);
+  console.log(`每日问答后端服务已启动 http://localhost:${PORT}`);
   const data = readData();
   ensureTodayQuestion(data);
-  console.log(`今日问题已准备就�? ${data.currentQuestion.question}`);
+  console.log(`今日问题已准备就绪 ${data.currentQuestion.question}`);
 });

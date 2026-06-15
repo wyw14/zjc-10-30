@@ -1,4 +1,4 @@
-{
+﻿{
   "questionBank": [
     {
       "id": 1,
@@ -103,5 +103,6 @@
       "answered": true,
       "answeredAt": "2026-06-14T00:30:22.110Z"
     }
-  }
+  },
+  "recycleBin": {}
 }

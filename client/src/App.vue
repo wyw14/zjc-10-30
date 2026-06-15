@@ -20,6 +20,13 @@
       >
         历史记录
       </button>
+      <button
+        class="tab-btn"
+        :class="{ active: currentTab === 'recycle' }"
+        @click="currentTab = 'recycle'; loadRecycleBin()"
+      >
+        回收站
+      </button>
     </div>
 
     <div v-if="loading || !todayData" class="loading">加载中...</div>
@@ -37,6 +44,15 @@
       :loading="historyLoading"
       @prev-month="prevMonth"
       @next-month="nextMonth"
+      @delete-answer="deleteAnswer"
+    />
+
+    <RecycleBinView
+      v-else-if="currentTab === 'recycle'"
+      :items="recycleBinItems"
+      :loading="recycleLoading"
+      @restore="restoreAnswer"
+      @permanent-delete="permanentDeleteAnswer"
     />
 
     <div v-if="toast.show" class="toast" :class="{ error: toast.isError }">
@@ -49,6 +65,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import TodayView from './components/TodayView.vue'
 import HistoryView from './components/HistoryView.vue'
+import RecycleBinView from './components/RecycleBinView.vue'
 
 const currentTab = ref('today')
 const loading = ref(false)
@@ -56,6 +73,8 @@ const submitting = ref(false)
 const todayData = ref(null)
 const history = ref(null)
 const historyLoading = ref(false)
+const recycleBinItems = ref([])
+const recycleLoading = ref(false)
 
 const toast = reactive({
   show: false,
@@ -147,6 +166,74 @@ function nextMonth() {
     viewMonth.value++
   }
   loadHistory()
+}
+
+async function loadRecycleBin() {
+  recycleLoading.value = true
+  try {
+    const res = await fetch('/api/recycle-bin')
+    const json = await res.json()
+    if (json.success) {
+      recycleBinItems.value = json.data
+    } else {
+      showToast(json.message || '加载回收站失败', true)
+    }
+  } catch (e) {
+    showToast('网络错误', true)
+  } finally {
+    recycleLoading.value = false
+  }
+}
+
+async function deleteAnswer(date) {
+  try {
+    const res = await fetch(`/api/answer/${date}`, {
+      method: 'DELETE'
+    })
+    const json = await res.json()
+    if (json.success) {
+      showToast(json.message || '已移至回收站')
+      await loadHistory()
+    } else {
+      showToast(json.message || '删除失败', true)
+    }
+  } catch (e) {
+    showToast('网络错误', true)
+  }
+}
+
+async function restoreAnswer(date) {
+  try {
+    const res = await fetch(`/api/recycle-bin/restore/${date}`, {
+      method: 'POST'
+    })
+    const json = await res.json()
+    if (json.success) {
+      showToast(json.message || '恢复成功')
+      await loadRecycleBin()
+    } else {
+      showToast(json.message || '恢复失败', true)
+    }
+  } catch (e) {
+    showToast('网络错误', true)
+  }
+}
+
+async function permanentDeleteAnswer(date) {
+  try {
+    const res = await fetch(`/api/recycle-bin/${date}`, {
+      method: 'DELETE'
+    })
+    const json = await res.json()
+    if (json.success) {
+      showToast(json.message || '已彻底删除')
+      await loadRecycleBin()
+    } else {
+      showToast(json.message || '删除失败', true)
+    }
+  } catch (e) {
+    showToast('网络错误', true)
+  }
 }
 
 onMounted(() => {
